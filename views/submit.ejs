@@ -1,0 +1,14 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Raise IT Ticket</title><link rel="stylesheet" href="/public/styles.css"></head><body><div class="container"><div class="card"><h1>Raise an IT Ticket</h1><p class="small">No account needed. Usually takes under 60 seconds.</p><% if (error) { %><div class="error"><%= error %></div><% } %><form method="post" action="/submit" enctype="multipart/form-data" class="grid">
+<div><label>Name *</label><input name="submitter_name" required value="<%= values.submitter_name || '' %>"></div>
+<div><label>Employee ID *</label><input name="employee_id" required value="<%= values.employee_id || '' %>"></div>
+<div><label>Email (optional)</label><input type="email" name="email" value="<%= values.email || '' %>"></div>
+<div><label>Department *</label><select name="department" required><option>HR</option><option>Engineering</option><option>Finance</option><option>Operations</option><option>Sales</option><option>Other</option></select></div>
+<div><label>Location / Site *</label><select name="location" required><option>HQ</option><option>Branch A</option><option>Branch B</option><option>Remote</option></select></div>
+<div><label>Issue Category *</label><select name="category" required><option>Laptop</option><option>Mouse</option><option>Charger / Power</option><option>Network / Wi‑Fi</option><option>Request: New IT asset</option><option>Other</option></select></div>
+<div><label>Urgency *</label><select name="priority" required><option>Low</option><option>Medium</option><option>High</option></select></div>
+<div><label>Subcategory (optional)</label><input name="subcategory" placeholder="e.g. Battery, VPN, Keyboard"></div>
+<div class="full"><label>Short summary *</label><input name="summary" required maxlength="120" placeholder="One-line summary"></div>
+<div class="full"><label>Description *</label><textarea name="description" rows="4" required placeholder="What happened? What did you try?"><%= values.description || '' %></textarea></div>
+<div class="full"><label>Attachments (max 3, each 10MB)</label><input type="file" name="attachments" multiple></div>
+<div class="full"><button type="submit">Submit Ticket</button> <a class="btn secondary" href="/status">Check existing ticket status</a></div>
+</form></div></div></body></html>
