@@ -1,7 +1,39 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin Dashboard</title><link rel="stylesheet" href="/public/styles.css"></head><body><div class="container"><div class="layout"><aside class="card sidebar"><h3>Filters</h3><form method="get" action="/admin">
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin Dashboard</title><link rel="stylesheet" href="/public/styles.css"></head><body><div class="container"><%- include('partials_top') %>
+<div class="kpi">
+  <div class="card"><div class="small">Total Tickets</div><div class="metric"><%= tickets.length %></div></div>
+  <div class="card"><div class="small">High Priority</div><div class="metric"><%= tickets.filter(t=>t.priority==='High').length %></div></div>
+  <div class="card"><div class="small">Open (not closed)</div><div class="metric"><%= tickets.filter(t=>t.status!=='Closed').length %></div></div>
+  <div class="card"><div class="small">Unassigned</div><div class="metric"><%= tickets.filter(t=>!t.assignee).length %></div></div>
+</div>
+<div class="layout">
+<aside class="card sidebar"><h3>Filters</h3><form method="get" action="/admin">
 <label>Status</label><select name="status"><option value="">All</option><option>New</option><option>Triaged</option><option>In Progress</option><option>Waiting for User</option><option>Resolved</option><option>Closed</option></select>
 <label>Category</label><select name="category"><option value="">All</option><option>Laptop</option><option>Mouse</option><option>Charger / Power</option><option>Network / Wi‑Fi</option><option>Request: New IT asset</option><option>Other</option></select>
 <label>Priority</label><select name="priority"><option value="">All</option><option>Low</option><option>Medium</option><option>High</option></select>
-<label>Search</label><input name="q" value="<%= filters.q %>" placeholder="ID/summary/name"><br><br><button type="submit">Apply</button>
+<label>Search</label><input name="q" value="<%= filters.q %>" placeholder="ID / summary / name">
+<br><br><button type="submit">Apply</button>
 </form><hr><p><a href="/admin/reports">Reports</a></p><p><a href="/admin/export.csv">Export CSV</a></p><p><a href="/admin/logout">Logout</a></p></aside>
-<main class="card"><h1>Tickets</h1><table class="table"><thead><tr><th>ID</th><th>Summary</th><th>Category</th><th>Priority</th><th>Status</th><th>Assignee</th><th>Created</th><th>Location</th></tr></thead><tbody><% tickets.forEach(t => { %><tr><td><a href="/admin/ticket/<%= t.ticket_id %>"><%= t.ticket_id %></a></td><td><%= t.summary %></td><td><%= t.category %></td><td><%= t.priority %></td><td><span class="badge status-<%= t.status %>"><%= t.status %></span></td><td><%= t.assignee || '-' %></td><td><%= t.created_at %></td><td><%= t.location %></td></tr><% }) %></tbody></table></main></div></div></body></html>
+<main class="card">
+<h1>Ticket Command Center</h1>
+<p class="small">List + Kanban view for fast triage.</p>
+
+<h3 style="margin-top:18px">Kanban</h3>
+<div class="kanban">
+  <% const stages=['New','Triaged','In Progress','Waiting for User','Resolved','Closed']; stages.forEach(s=>{ %>
+    <div class="column">
+      <h4><%= s %> • <%= tickets.filter(t=>t.status===s).length %></h4>
+      <% tickets.filter(t=>t.status===s).slice(0,8).forEach(t=>{ %>
+        <div class="tcard">
+          <a href="/admin/ticket/<%= t.ticket_id %>"><%= t.ticket_id %></a>
+          <div><%= t.summary %></div>
+          <div class="meta"><%= t.priority %> • <%= t.category %></div>
+        </div>
+      <% }) %>
+    </div>
+  <% }) %>
+</div>
+
+<h3 style="margin-top:20px">Detailed List</h3>
+<table class="table"><thead><tr><th>ID</th><th>Summary</th><th>Category</th><th>Priority</th><th>Status</th><th>Assignee</th><th>Created</th><th>Location</th></tr></thead><tbody><% tickets.forEach(t => { %><tr><td><a href="/admin/ticket/<%= t.ticket_id %>"><%= t.ticket_id %></a></td><td><%= t.summary %></td><td><%= t.category %></td><td><%= t.priority %></td><td><span class="badge status-<%= t.status %>"><%= t.status %></span></td><td><%= t.assignee || '-' %></td><td><%= t.created_at %></td><td><%= t.location %></td></tr><% }) %></tbody></table>
+</main>
+</div></div></body></html>
