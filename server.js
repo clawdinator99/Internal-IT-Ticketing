@@ -344,13 +344,12 @@ app.post('/admin/login', (req, res) => {
 app.get('/admin/logout', (req, res) => { res.clearCookie('admin_session'); res.redirect('/admin/login'); });
 
 app.get('/admin', authRequired, async (req, res) => {
-  const filters = { status: req.query.status || '', category: req.query.category || '', priority: req.query.priority || '', q: req.query.q || '' };
+  const filters = { status: req.query.status || '', category: req.query.category || '', priority: req.query.priority || '' };
   let sql = 'SELECT * FROM tickets WHERE 1=1';
   const params = [];
   if (filters.status) { sql += ' AND status = ?'; params.push(filters.status); }
   if (filters.category) { sql += ' AND category = ?'; params.push(filters.category); }
   if (filters.priority) { sql += ' AND priority = ?'; params.push(filters.priority); }
-  if (filters.q) { sql += ' AND (ticket_id LIKE ? OR summary LIKE ? OR submitter_name LIKE ?)'; params.push(`%${filters.q}%`, `%${filters.q}%`, `%${filters.q}%`); }
   sql += ' ORDER BY created_at DESC';
 
   const tickets = await dbAll(sql, params);

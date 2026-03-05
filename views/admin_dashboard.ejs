@@ -49,10 +49,7 @@
             <option <%= filters.priority==='High'?'selected':'' %>>High</option>
           </select>
 
-          <label>Search</label>
-          <input name="q" value="<%= filters.q %>" placeholder="ID / summary / submitter">
-
-          <br><br>
+          <br>
           <button type="submit">Apply</button>
           <a class="btn secondary" href="/admin" style="margin-left:8px">Reset</a>
         </form>
