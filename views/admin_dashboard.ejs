@@ -14,7 +14,7 @@
       <div class="card"><div class="small">Total Tickets</div><div class="metric"><%= kpi.total %></div></div>
       <div class="card"><div class="small">High Priority</div><div class="metric"><%= kpi.high %></div></div>
       <div class="card"><div class="small">In Progress</div><div class="metric"><%= kpi.inProgress %></div></div>
-      <div class="card"><div class="small">Resolved / Closed</div><div class="metric"><%= kpi.resolved %></div></div>
+      <div class="card"><div class="small">Resolved</div><div class="metric"><%= kpi.resolved %></div></div>
     </div>
 
     <div class="layout">
@@ -27,7 +27,6 @@
             <option value="New" <%= filters.status==='New'?'selected':'' %>>New</option>
             <option value="In Progress" <%= filters.status==='In Progress'?'selected':'' %>>In Progress</option>
             <option value="Resolved" <%= filters.status==='Resolved'?'selected':'' %>>Resolved</option>
-            <option value="Closed" <%= filters.status==='Closed'?'selected':'' %>>Closed</option>
           </select>
 
           <label>Category</label>

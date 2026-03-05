@@ -357,7 +357,7 @@ app.get('/admin', authRequired, async (req, res) => {
   const total = await dbGet('SELECT COUNT(*) AS c FROM tickets');
   const high = await dbGet("SELECT COUNT(*) AS c FROM tickets WHERE priority = 'High'");
   const inProgress = await dbGet("SELECT COUNT(*) AS c FROM tickets WHERE status = 'In Progress'");
-  const resolved = await dbGet("SELECT COUNT(*) AS c FROM tickets WHERE status IN ('Resolved', 'Closed')");
+  const resolved = await dbGet("SELECT COUNT(*) AS c FROM tickets WHERE status = 'Resolved'");
   res.render('admin_dashboard', { tickets, filters, stats, kpi: { total: total.c, high: high.c, inProgress: inProgress.c, resolved: resolved.c }, fmt });
 });
 
@@ -375,7 +375,9 @@ app.post('/admin/ticket/:ticketId/update', authRequired, async (req, res) => {
   if (!t) return res.status(404).send('Ticket not found');
 
   const now = toDbTs();
-  const status = req.body.status || t.status;
+  const allowedStatuses = new Set(['New', 'In Progress', 'Waiting for User', 'Resolved']);
+  const requestedStatus = req.body.status || t.status;
+  const status = allowedStatuses.has(requestedStatus) ? requestedStatus : t.status;
   const note = (req.body.note || '').trim();
 
   await dbRun('UPDATE tickets SET status = ?, updated_at = ?, first_response_at = COALESCE(first_response_at, ?) WHERE ticket_id = ?', [status, now, now, t.ticket_id]);
