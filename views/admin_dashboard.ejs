@@ -24,23 +24,21 @@
           <label>Status</label>
           <select name="status">
             <option value="" <%= !filters.status ? 'selected' : '' %>>All</option>
-            <option <%= filters.status==='New'?'selected':'' %>>New</option>
-            <option <%= filters.status==='Triaged'?'selected':'' %>>Triaged</option>
-            <option <%= filters.status==='In Progress'?'selected':'' %>>In Progress</option>
-            <option <%= filters.status==='Waiting for User'?'selected':'' %>>Waiting for User</option>
-            <option <%= filters.status==='Resolved'?'selected':'' %>>Resolved</option>
-            <option <%= filters.status==='Closed'?'selected':'' %>>Closed</option>
+            <option value="New" <%= filters.status==='New'?'selected':'' %>>New</option>
+            <option value="In Progress" <%= filters.status==='In Progress'?'selected':'' %>>In Progress</option>
+            <option value="Resolved" <%= filters.status==='Resolved'?'selected':'' %>>Resolved</option>
+            <option value="Closed" <%= filters.status==='Closed'?'selected':'' %>>Closed</option>
           </select>
 
           <label>Category</label>
           <select name="category">
             <option value="" <%= !filters.category ? 'selected' : '' %>>All</option>
-            <option <%= filters.category==='Laptop'?'selected':'' %>>Laptop</option>
-            <option <%= filters.category==='Mouse'?'selected':'' %>>Mouse</option>
-            <option <%= filters.category==='Charger / Power'?'selected':'' %>>Charger / Power</option>
-            <option <%= filters.category==='Network / Wi‑Fi'?'selected':'' %>>Network / Wi‑Fi</option>
-            <option <%= filters.category==='Request: New IT asset'?'selected':'' %>>Request: New IT asset</option>
-            <option <%= filters.category==='Other'?'selected':'' %>>Other</option>
+            <option value="Laptop" <%= filters.category==='Laptop'?'selected':'' %>>Laptop</option>
+            <option value="Mouse" <%= filters.category==='Mouse'?'selected':'' %>>Mouse</option>
+            <option value="Charger / Power" <%= filters.category==='Charger / Power'?'selected':'' %>>Charger / Power</option>
+            <option value="Network / Wi-Fi" <%= filters.category==='Network / Wi-Fi'?'selected':'' %>>Network / Wi-Fi</option>
+            <option value="Request: New IT asset" <%= filters.category==='Request: New IT asset'?'selected':'' %>>Request: New IT asset</option>
+            <option value="Other" <%= filters.category==='Other'?'selected':'' %>>Other</option>
           </select>
 
           <label>Priority</label>
@@ -60,8 +58,6 @@
         </form>
 
         <hr>
-        <p><a href="/admin/reports">Reports</a></p>
-        <p><a href="/admin/export.csv">Export CSV</a></p>
         <p><a href="/admin/logout">Logout</a></p>
       </aside>
 

@@ -389,22 +389,8 @@ app.post('/admin/ticket/:ticketId/update', authRequired, async (req, res) => {
   res.redirect(`/admin/ticket/${t.ticket_id}`);
 });
 
-app.get('/admin/reports', authRequired, async (_, res) => {
-  const byCategory = await dbAll('SELECT category, COUNT(*) as count FROM tickets GROUP BY category ORDER BY count DESC');
-  const kpi = DB_CLIENT === 'mysql'
-    ? await dbGet(`SELECT AVG(TIMESTAMPDIFF(SECOND, created_at, COALESCE(first_response_at, updated_at))) / 3600 as avg_first_response_hours, AVG(TIMESTAMPDIFF(SECOND, created_at, COALESCE(resolved_at, updated_at))) / 3600 as avg_resolution_hours FROM tickets`)
-    : await dbGet(`SELECT AVG((julianday(COALESCE(first_response_at, updated_at)) - julianday(created_at)) * 24) as avg_first_response_hours, AVG((julianday(COALESCE(resolved_at, updated_at)) - julianday(created_at)) * 24) as avg_resolution_hours FROM tickets`);
-  res.render('admin_reports', { byCategory, kpi });
-});
-
-app.get('/admin/export.csv', authRequired, async (_, res) => {
-  const rows = await dbAll('SELECT ticket_id, submitter_name, employee_id, category, priority, status, created_at, updated_at, location FROM tickets ORDER BY created_at DESC');
-  const header = 'ticket_id,submitter_name,employee_id,category,priority,status,created_at,updated_at,location';
-  const csv = [header, ...rows.map(r => [r.ticket_id, r.submitter_name, r.employee_id, r.category, r.priority, r.status, r.created_at, r.updated_at, r.location].map(v => `"${String(v).replaceAll('"', '""')}"`).join(','))].join('\n');
-  res.setHeader('Content-Type', 'text/csv');
-  res.setHeader('Content-Disposition', 'attachment; filename="tickets.csv"');
-  res.send(csv);
-});
+app.get('/admin/reports', authRequired, async (_, res) => res.status(404).send('Not found'));
+app.get('/admin/export.csv', authRequired, async (_, res) => res.status(404).send('Not found'));
 
 initDb().then(() => {
   app.listen(PORT, () => console.log(`IT ticketing tool running on http://localhost:${PORT} (db=${DB_CLIENT})`));
