@@ -1,2 +1,98 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><%= ticket.ticket_id %></title><link rel="stylesheet" href="/public/styles.css"></head><body><div class="container"><%- include('partials_top') %><a class="btn secondary" href="/admin">← Back</a><div class="layout" style="margin-top:12px"><main class="card"><h1><%= ticket.ticket_id %> <span class="badge status-<%= ticket.status %>"><%= ticket.status %></span></h1><p><strong><%= ticket.summary %></strong></p><p><%= ticket.description %></p><p class="small">Submitter: <%= ticket.submitter_name %> (<%= ticket.employee_id %>) • <%= ticket.department %> • <%= ticket.location %></p><h3>Attachments</h3><ul><% attachments.forEach(a => { %><li><a href="/uploads/<%= a.stored_name %>" target="_blank"><%= a.original_name %></a> (<%= Math.round(a.size/1024) %> KB)</li><% }) %></ul><h3>Audit Log</h3><ul class="timeline"><% audit.forEach(a => { %><li><strong><%= a.action %></strong> <span class="small">(<%= a.created_at %>)</span> <% if (a.from_value || a.to_value) { %><div class="small"><%= a.from_value || '-' %> → <%= a.to_value || '-' %></div><% } %> <% if (a.note) { %><div><%= a.note %></div><% } %></li><% }) %></ul></main>
-<aside class="card sidebar"><h3>Update Ticket</h3><form method="post" action="/admin/ticket/<%= ticket.ticket_id %>/update"><label>Status</label><select name="status"><option <%= ticket.status==='New'?'selected':'' %>>New</option><option <%= ticket.status==='Triaged'?'selected':'' %>>Triaged</option><option <%= ticket.status==='In Progress'?'selected':'' %>>In Progress</option><option <%= ticket.status==='Waiting for User'?'selected':'' %>>Waiting for User</option><option <%= ticket.status==='Resolved'?'selected':'' %>>Resolved</option><option <%= ticket.status==='Closed'?'selected':'' %>>Closed</option></select><label>Assignee</label><input name="assignee" value="<%= ticket.assignee || '' %>" placeholder="Technician name"><label>Internal note</label><textarea name="note" rows="4" placeholder="Add internal update"></textarea><br><button type="submit">Save Changes</button></form><hr><h3>Internal Notes</h3><ul><% notes.forEach(n => { %><li><strong><%= n.author %>:</strong> <%= n.note %><div class="small"><%= n.created_at %></div></li><% }) %></ul></aside></div></div><script src="/public/app.js"></script></body></html>
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title><%= ticket.ticket_id %></title>
+  <link rel="stylesheet" href="/public/styles.css">
+</head>
+<body>
+  <div class="container">
+    <%- include('partials_top') %>
+    <a class="btn secondary" href="/admin">← Back to Dashboard</a>
+
+    <div class="layout" style="margin-top:12px; grid-template-columns:1.25fr .75fr;">
+      <main class="card">
+        <h1><%= ticket.ticket_id %> <span class="badge status-<%= ticket.status %>"><%= ticket.status %></span></h1>
+        <p><strong><%= ticket.summary %></strong></p>
+        <p><%= ticket.description %></p>
+
+        <div class="grid" style="margin-top:12px">
+          <div><label>Requester</label><div><%= ticket.submitter_name %> (<%= ticket.employee_id %>)</div></div>
+          <div><label>Email</label><div><%= ticket.email || '-' %></div></div>
+          <div><label>Category</label><div><%= ticket.category %></div></div>
+          <div><label>Priority</label><div><%= ticket.priority %></div></div>
+          <div><label>SLA Due</label><div><%= fmt(ticket.sla_due_at) %></div></div>
+          <div><label>Current Status</label><div><span class="badge status-<%= ticket.status %>"><%= ticket.status %></span></div></div>
+          <div><label>Created</label><div><%= fmt(ticket.created_at) %></div></div>
+          <div><label>Last Updated</label><div><%= fmt(ticket.updated_at) %></div></div>
+        </div>
+
+        <h3 style="margin-top:18px">Attachments</h3>
+        <% if (!attachments.length) { %>
+          <p class="small">No attachments uploaded.</p>
+        <% } else { %>
+          <ul>
+            <% attachments.forEach(a => { %>
+              <li>
+                <a href="/uploads/<%= a.stored_name %>" target="_blank"><%= a.original_name %></a>
+                <span class="small">(<%= Math.round(a.size/1024) %> KB)</span>
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+
+        <h3 style="margin-top:18px">Audit Timeline</h3>
+        <ul class="timeline">
+          <% audit.forEach(a => { %>
+            <li>
+              <strong><%= a.action %></strong> <span class="small">(<%= fmt(a.created_at) %>)</span>
+              <% if (a.from_value || a.to_value) { %>
+                <div class="small"><%= a.from_value || '-' %> → <%= a.to_value || '-' %></div>
+              <% } %>
+              <% if (a.note) { %><div><%= a.note %></div><% } %>
+            </li>
+          <% }) %>
+        </ul>
+      </main>
+
+      <aside class="card sidebar" style="width:auto">
+        <h3>Update Ticket</h3>
+        <form method="post" action="/admin/ticket/<%= ticket.ticket_id %>/update">
+          <label>Status</label>
+          <select name="status">
+            <option <%= ticket.status==='New'?'selected':'' %>>New</option>
+            <option <%= ticket.status==='Triaged'?'selected':'' %>>Triaged</option>
+            <option <%= ticket.status==='In Progress'?'selected':'' %>>In Progress</option>
+            <option <%= ticket.status==='Waiting for User'?'selected':'' %>>Waiting for User</option>
+            <option <%= ticket.status==='Resolved'?'selected':'' %>>Resolved</option>
+            <option <%= ticket.status==='Closed'?'selected':'' %>>Closed</option>
+          </select>
+
+          <label>Internal Note</label>
+          <textarea name="note" rows="4" placeholder="Add internal update"></textarea>
+
+          <br>
+          <button type="submit">Save Changes</button>
+        </form>
+
+        <hr>
+        <h3>Internal Notes</h3>
+        <% if (!notes.length) { %>
+          <p class="small">No internal notes yet.</p>
+        <% } else { %>
+          <ul>
+            <% notes.forEach(n => { %>
+              <li>
+                <strong><%= n.author %>:</strong> <%= n.note %>
+                <div class="small"><%= fmt(n.created_at) %></div>
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </aside>
+    </div>
+  </div>
+  <script src="/public/app.js"></script>
+</body>
+</html>

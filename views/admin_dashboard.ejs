@@ -1,39 +1,111 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin Dashboard</title><link rel="stylesheet" href="/public/styles.css"></head><body><div class="container"><%- include('partials_top') %>
-<div class="kpi">
-  <div class="card"><div class="small">Total Tickets</div><div class="metric"><%= tickets.length %></div></div>
-  <div class="card"><div class="small">High Priority</div><div class="metric"><%= tickets.filter(t=>t.priority==='High').length %></div></div>
-  <div class="card"><div class="small">Open (not closed)</div><div class="metric"><%= tickets.filter(t=>t.status!=='Closed').length %></div></div>
-  <div class="card"><div class="small">Unassigned</div><div class="metric"><%= tickets.filter(t=>!t.assignee).length %></div></div>
-</div>
-<div class="layout">
-<aside class="card sidebar"><h3>Filters</h3><form method="get" action="/admin">
-<label>Status</label><select name="status"><option value="">All</option><option>New</option><option>Triaged</option><option>In Progress</option><option>Waiting for User</option><option>Resolved</option><option>Closed</option></select>
-<label>Category</label><select name="category"><option value="">All</option><option>Laptop</option><option>Mouse</option><option>Charger / Power</option><option>Network / Wi‑Fi</option><option>Request: New IT asset</option><option>Other</option></select>
-<label>Priority</label><select name="priority"><option value="">All</option><option>Low</option><option>Medium</option><option>High</option></select>
-<label>Search</label><input name="q" value="<%= filters.q %>" placeholder="ID / summary / name">
-<br><br><button type="submit">Apply</button>
-</form><hr><p><a href="/admin/reports">Reports</a></p><p><a href="/admin/export.csv">Export CSV</a></p><p><a href="/admin/logout">Logout</a></p></aside>
-<main class="card">
-<h1>Ticket Command Center</h1>
-<p class="small">List + Kanban view for fast triage.</p>
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="/public/styles.css">
+</head>
+<body>
+  <div class="container">
+    <%- include('partials_top') %>
 
-<h3 style="margin-top:18px">Kanban</h3>
-<div class="kanban">
-  <% const stages=['New','Triaged','In Progress','Waiting for User','Resolved','Closed']; stages.forEach(s=>{ %>
-    <div class="column">
-      <h4><%= s %> • <%= tickets.filter(t=>t.status===s).length %></h4>
-      <% tickets.filter(t=>t.status===s).slice(0,8).forEach(t=>{ %>
-        <div class="tcard">
-          <a href="/admin/ticket/<%= t.ticket_id %>"><%= t.ticket_id %></a>
-          <div><%= t.summary %></div>
-          <div class="meta"><%= t.priority %> • <%= t.category %></div>
-        </div>
-      <% }) %>
+    <div class="kpi">
+      <div class="card"><div class="small">Total Tickets</div><div class="metric"><%= kpi.total %></div></div>
+      <div class="card"><div class="small">High Priority</div><div class="metric"><%= kpi.high %></div></div>
+      <div class="card"><div class="small">In Progress</div><div class="metric"><%= kpi.inProgress %></div></div>
+      <div class="card"><div class="small">Resolved / Closed</div><div class="metric"><%= kpi.resolved %></div></div>
     </div>
-  <% }) %>
-</div>
 
-<h3 style="margin-top:20px">Detailed List</h3>
-<table class="table"><thead><tr><th>ID</th><th>Summary</th><th>Category</th><th>Priority</th><th>Status</th><th>Assignee</th><th>Created</th><th>Location</th></tr></thead><tbody><% tickets.forEach(t => { %><tr><td><a href="/admin/ticket/<%= t.ticket_id %>"><%= t.ticket_id %></a></td><td><%= t.summary %></td><td><%= t.category %></td><td><%= t.priority %></td><td><span class="badge status-<%= t.status %>"><%= t.status %></span></td><td><%= t.assignee || '-' %></td><td><%= t.created_at %></td><td><%= t.location %></td></tr><% }) %></tbody></table>
-</main>
-</div></div></body></html>
+    <div class="layout">
+      <aside class="card sidebar">
+        <h3>Filters</h3>
+        <form method="get" action="/admin">
+          <label>Status</label>
+          <select name="status">
+            <option value="" <%= !filters.status ? 'selected' : '' %>>All</option>
+            <option <%= filters.status==='New'?'selected':'' %>>New</option>
+            <option <%= filters.status==='Triaged'?'selected':'' %>>Triaged</option>
+            <option <%= filters.status==='In Progress'?'selected':'' %>>In Progress</option>
+            <option <%= filters.status==='Waiting for User'?'selected':'' %>>Waiting for User</option>
+            <option <%= filters.status==='Resolved'?'selected':'' %>>Resolved</option>
+            <option <%= filters.status==='Closed'?'selected':'' %>>Closed</option>
+          </select>
+
+          <label>Category</label>
+          <select name="category">
+            <option value="" <%= !filters.category ? 'selected' : '' %>>All</option>
+            <option <%= filters.category==='Laptop'?'selected':'' %>>Laptop</option>
+            <option <%= filters.category==='Mouse'?'selected':'' %>>Mouse</option>
+            <option <%= filters.category==='Charger / Power'?'selected':'' %>>Charger / Power</option>
+            <option <%= filters.category==='Network / Wi‑Fi'?'selected':'' %>>Network / Wi‑Fi</option>
+            <option <%= filters.category==='Request: New IT asset'?'selected':'' %>>Request: New IT asset</option>
+            <option <%= filters.category==='Other'?'selected':'' %>>Other</option>
+          </select>
+
+          <label>Priority</label>
+          <select name="priority">
+            <option value="" <%= !filters.priority ? 'selected' : '' %>>All</option>
+            <option <%= filters.priority==='Low'?'selected':'' %>>Low</option>
+            <option <%= filters.priority==='Medium'?'selected':'' %>>Medium</option>
+            <option <%= filters.priority==='High'?'selected':'' %>>High</option>
+          </select>
+
+          <label>Search</label>
+          <input name="q" value="<%= filters.q %>" placeholder="ID / summary / submitter">
+
+          <br><br>
+          <button type="submit">Apply</button>
+          <a class="btn secondary" href="/admin" style="margin-left:8px">Reset</a>
+        </form>
+
+        <hr>
+        <p><a href="/admin/reports">Reports</a></p>
+        <p><a href="/admin/export.csv">Export CSV</a></p>
+        <p><a href="/admin/logout">Logout</a></p>
+      </aside>
+
+      <main class="card">
+        <h1>Ticket Operations</h1>
+        <p class="small">Detailed list with all key ticket fields for quick triage and follow-up.</p>
+
+        <div style="overflow-x:auto; margin-top:10px">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Summary</th>
+                <th>Requester</th>
+                <th>Email</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Updated</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (!tickets.length) { %>
+                <tr><td colspan="9" class="small">No tickets match current filters.</td></tr>
+              <% } %>
+              <% tickets.forEach(t => { %>
+                <tr>
+                  <td><a href="/admin/ticket/<%= t.ticket_id %>"><strong><%= t.ticket_id %></strong></a></td>
+                  <td><%= t.summary %></td>
+                  <td><%= t.submitter_name %> (<%= t.employee_id %>)</td>
+                  <td><%= t.email || '-' %></td>
+                  <td><%= t.category %></td>
+                  <td><%= t.priority %></td>
+                  <td><span class="badge status-<%= t.status %>"><%= t.status %></span></td>
+                  <td><%= fmt(t.created_at) %></td>
+                  <td><%= fmt(t.updated_at) %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

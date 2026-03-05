@@ -19,15 +19,34 @@ npm start
 
 Open: `http://localhost:3000`
 
+## MySQL DB Pack
+
+Ready-to-run MySQL files are in `db/mysql/`:
+- `001_schema.sql`
+- `002_indexes.sql`
+- `003_seed.sql` (optional sample data)
+
+Apply:
+
+```bash
+mysql -u <user> -p -h <host> <database> < db/mysql/001_schema.sql
+mysql -u <user> -p -h <host> <database> < db/mysql/002_indexes.sql
+mysql -u <user> -p -h <host> <database> < db/mysql/003_seed.sql
+```
+
 ## Admin login (default)
 - Username: `admin`
 - Password: `admin123`
 
-Set env vars in production:
+## Production env (required)
+Copy `.env.example` and set strong values:
+- `NODE_ENV=production`
 - `ADMIN_USER`
 - `ADMIN_PASS`
 - `SESSION_SECRET`
 - `PORT`
+
+The app will refuse to start in production if default credentials/secrets are still set.
 
 ## Data
 - SQLite DB: `data/tickets.db`

@@ -11,9 +11,15 @@ const Database = require('better-sqlite3');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const IS_PROD = NODE_ENV === 'production';
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'admin123';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'change-me-now';
+
+if (IS_PROD && (ADMIN_USER === 'admin' || ADMIN_PASS === 'admin123' || SESSION_SECRET === 'change-me-now')) {
+  throw new Error('Refusing to start in production with default ADMIN_USER/ADMIN_PASS/SESSION_SECRET. Set strong env vars.');
+}
 
 const dataDir = path.join(__dirname, 'data');
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -82,6 +88,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
+app.set('trust proxy', 1);
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(uploadsDir));
@@ -138,6 +145,11 @@ function addAudit(ticket, actor, action, fromValue = null, toValue = null, note 
     .run(ticket, actor, action, fromValue, toValue, note, new Date().toISOString());
 }
 
+function fmt(ts) {
+  if (!ts) return '-';
+  return dayjs(ts).format('DD MMM YYYY, h:mm A');
+}
+
 app.get('/', (_, res) => res.redirect('/submit'));
 
 app.get('/submit', (_, res) => {
@@ -146,7 +158,7 @@ app.get('/submit', (_, res) => {
 
 app.post('/submit', upload.array('attachments', 3), (req, res) => {
   try {
-    const required = ['submitter_name', 'employee_id', 'department', 'location', 'category', 'priority', 'summary', 'description'];
+    const required = ['submitter_name', 'employee_id', 'email', 'category', 'priority', 'summary', 'description'];
     for (const f of required) {
       if (!req.body[f] || !String(req.body[f]).trim()) {
         return res.status(400).render('submit', { error: `Missing required field: ${f}`, values: req.body });
@@ -169,11 +181,11 @@ app.post('/submit', upload.array('attachments', 3), (req, res) => {
         now,
         req.body.submitter_name.trim(),
         req.body.employee_id.trim(),
-        (req.body.email || '').trim() || null,
-        req.body.department,
-        req.body.location,
+        (req.body.email || '').trim(),
+        'General',
+        'Unspecified',
         req.body.category,
-        (req.body.subcategory || '').trim() || null,
+        null,
         req.body.priority,
         req.body.summary.trim(),
         req.body.description.trim(),
@@ -196,14 +208,14 @@ app.post('/submit', upload.array('attachments', 3), (req, res) => {
   }
 });
 
-app.get('/status', (_, res) => res.render('status_lookup', { ticket: null, error: null }));
+app.get('/status', (_, res) => res.render('status_lookup', { ticket: null, error: null, fmt }));
 app.post('/status', (req, res) => {
   const { ticket_id, employee_id } = req.body;
   const ticket = db.prepare('SELECT * FROM tickets WHERE ticket_id = ? AND employee_id = ?').get(ticket_id, employee_id);
-  if (!ticket) return res.status(404).render('status_lookup', { ticket: null, error: 'Ticket not found. Check Ticket ID and Employee ID.' });
+  if (!ticket) return res.status(404).render('status_lookup', { ticket: null, error: 'Ticket not found. Check Ticket ID and Employee ID.', fmt });
   const audit = db.prepare('SELECT * FROM audit_logs WHERE ticket_id = ? ORDER BY created_at DESC').all(ticket.ticket_id);
   const attachments = db.prepare('SELECT * FROM attachments WHERE ticket_id = ? ORDER BY created_at DESC').all(ticket.ticket_id);
-  res.render('status_lookup', { ticket: { ...ticket, audit, attachments }, error: null });
+  res.render('status_lookup', { ticket: { ...ticket, audit, attachments }, error: null, fmt });
 });
 
 app.get('/status/:token', (req, res) => {
@@ -211,7 +223,7 @@ app.get('/status/:token', (req, res) => {
   if (!ticket) return res.status(404).send('Invalid or expired status link.');
   const audit = db.prepare('SELECT * FROM audit_logs WHERE ticket_id = ? ORDER BY created_at DESC').all(ticket.ticket_id);
   const attachments = db.prepare('SELECT * FROM attachments WHERE ticket_id = ? ORDER BY created_at DESC').all(ticket.ticket_id);
-  res.render('status_page', { ticket: { ...ticket, audit, attachments } });
+  res.render('status_page', { ticket: { ...ticket, audit, attachments }, fmt });
 });
 
 app.get('/admin/login', (_, res) => res.render('admin_login', { error: null }));
@@ -221,7 +233,12 @@ app.post('/admin/login', (req, res) => {
     return res.status(401).render('admin_login', { error: 'Invalid credentials' });
   }
   const token = crypto.createHmac('sha256', SESSION_SECRET).update(`${ADMIN_USER}:session`).digest('hex');
-  res.cookie('admin_session', token, { httpOnly: true, sameSite: 'lax' });
+  res.cookie('admin_session', token, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: IS_PROD,
+    maxAge: 12 * 60 * 60 * 1000
+  });
   res.redirect('/admin');
 });
 
@@ -247,7 +264,13 @@ app.get('/admin', authRequired, (req, res) => {
 
   const tickets = db.prepare(sql).all(...params);
   const stats = db.prepare('SELECT category, COUNT(*) as count FROM tickets GROUP BY category').all();
-  res.render('admin_dashboard', { tickets, filters, stats });
+  const kpi = {
+    total: db.prepare('SELECT COUNT(*) AS c FROM tickets').get().c,
+    high: db.prepare("SELECT COUNT(*) AS c FROM tickets WHERE priority = 'High'").get().c,
+    inProgress: db.prepare("SELECT COUNT(*) AS c FROM tickets WHERE status = 'In Progress'").get().c,
+    resolved: db.prepare("SELECT COUNT(*) AS c FROM tickets WHERE status IN ('Resolved', 'Closed')").get().c
+  };
+  res.render('admin_dashboard', { tickets, filters, stats, kpi, fmt });
 });
 
 app.get('/admin/ticket/:ticketId', authRequired, (req, res) => {
@@ -256,7 +279,7 @@ app.get('/admin/ticket/:ticketId', authRequired, (req, res) => {
   const audit = db.prepare('SELECT * FROM audit_logs WHERE ticket_id = ? ORDER BY created_at DESC').all(ticket.ticket_id);
   const notes = db.prepare('SELECT * FROM internal_notes WHERE ticket_id = ? ORDER BY created_at DESC').all(ticket.ticket_id);
   const attachments = db.prepare('SELECT * FROM attachments WHERE ticket_id = ? ORDER BY created_at DESC').all(ticket.ticket_id);
-  res.render('admin_ticket', { ticket, audit, notes, attachments });
+  res.render('admin_ticket', { ticket, audit, notes, attachments, fmt });
 });
 
 app.post('/admin/ticket/:ticketId/update', authRequired, (req, res) => {
@@ -265,14 +288,12 @@ app.post('/admin/ticket/:ticketId/update', authRequired, (req, res) => {
 
   const now = new Date().toISOString();
   const status = req.body.status || t.status;
-  const assignee = (req.body.assignee || '').trim() || null;
   const note = (req.body.note || '').trim();
 
-  db.prepare('UPDATE tickets SET status = ?, assignee = ?, updated_at = ?, first_response_at = COALESCE(first_response_at, ?) WHERE ticket_id = ?')
-    .run(status, assignee, now, now, t.ticket_id);
+  db.prepare('UPDATE tickets SET status = ?, updated_at = ?, first_response_at = COALESCE(first_response_at, ?) WHERE ticket_id = ?')
+    .run(status, now, now, t.ticket_id);
 
   if (status !== t.status) addAudit(t.ticket_id, 'admin', 'status_changed', t.status, status, note || null);
-  if (assignee !== t.assignee) addAudit(t.ticket_id, 'admin', 'assignee_changed', t.assignee, assignee, null);
   if (note) {
     db.prepare('INSERT INTO internal_notes (ticket_id, author, note, created_at) VALUES (?, ?, ?, ?)')
       .run(t.ticket_id, 'admin', note, now);
@@ -296,9 +317,9 @@ app.get('/admin/reports', authRequired, (_, res) => {
 });
 
 app.get('/admin/export.csv', authRequired, (_, res) => {
-  const rows = db.prepare('SELECT ticket_id, submitter_name, employee_id, category, priority, status, assignee, created_at, updated_at, location FROM tickets ORDER BY created_at DESC').all();
-  const header = 'ticket_id,submitter_name,employee_id,category,priority,status,assignee,created_at,updated_at,location';
-  const csv = [header, ...rows.map(r => [r.ticket_id, r.submitter_name, r.employee_id, r.category, r.priority, r.status, r.assignee || '', r.created_at, r.updated_at, r.location].map(v => `"${String(v).replaceAll('"', '""')}"`).join(','))].join('\n');
+  const rows = db.prepare('SELECT ticket_id, submitter_name, employee_id, category, priority, status, created_at, updated_at, location FROM tickets ORDER BY created_at DESC').all();
+  const header = 'ticket_id,submitter_name,employee_id,category,priority,status,created_at,updated_at,location';
+  const csv = [header, ...rows.map(r => [r.ticket_id, r.submitter_name, r.employee_id, r.category, r.priority, r.status, r.created_at, r.updated_at, r.location].map(v => `"${String(v).replaceAll('"', '""')}"`).join(','))].join('\n');
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader('Content-Disposition', 'attachment; filename="tickets.csv"');
   res.send(csv);

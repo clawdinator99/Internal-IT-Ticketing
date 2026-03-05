@@ -15,6 +15,7 @@ h1,h2,h3{margin:0 0 12px}.small{color:var(--muted);font-size:13px}
 label{display:block;font-size:13px;margin-bottom:6px;color:#c6d4ff}
 input,select,textarea{width:100%;border:1px solid var(--border);background:rgba(255,255,255,.04);color:#fff;border-radius:14px;padding:11px 12px;outline:none;transition:.18s ease}
 input::placeholder,textarea::placeholder{color:#8ea0cb}input:focus,select:focus,textarea:focus{border-color:rgba(110,168,254,.8);box-shadow:0 0 0 4px rgba(110,168,254,.2)}
+select option{background:#ffffff;color:#111827}
 button,.btn{border:0;border-radius:14px;padding:11px 16px;cursor:pointer;color:#fff;font-weight:700;text-decoration:none;display:inline-block;background:linear-gradient(135deg,#5e95ff,#7f7bff)}
 .btn.secondary{background:rgba(255,255,255,.06);border:1px solid var(--border);color:#e5ebff}
 .error{background:rgba(239,68,68,.2);color:#ffd4d4;border:1px solid rgba(239,68,68,.45);padding:10px 12px;border-radius:12px;margin-bottom:12px}
@@ -22,6 +23,9 @@ button,.btn{border:0;border-radius:14px;padding:11px 16px;cursor:pointer;color:#
 .badge{padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid transparent;display:inline-block;transition:all .25s ease}
 .status-New,.status-Triaged{background:rgba(110,168,254,.18);color:#b9d2ff;border-color:rgba(110,168,254,.4)}.status-In\ Progress{background:rgba(167,139,250,.18);color:#ddd0ff;border-color:rgba(167,139,250,.45)}.status-Waiting\ for\ User{background:rgba(245,158,11,.18);color:#ffd7a6;border-color:rgba(245,158,11,.45)}.status-Resolved,.status-Closed{background:rgba(34,197,94,.18);color:#b6f7cd;border-color:rgba(34,197,94,.45)}
 .layout{display:grid;grid-template-columns:280px 1fr;gap:14px}.kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:12px}.kpi .card{padding:14px;border-radius:18px}.metric{font-size:24px;font-weight:800}
+.sidebar{position:sticky;top:14px;align-self:start}
+.table td,.table th{vertical-align:top}
+.table td:nth-child(2){min-width:260px}
 .timeline{list-style:none;margin:0;padding:0}.timeline li{border-left:2px solid rgba(255,255,255,.15);margin-left:8px;padding:0 0 12px 12px}
 .kanban{display:grid;grid-template-columns:repeat(6,minmax(220px,1fr));gap:10px;overflow-x:auto;padding-bottom:8px}.column{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:18px;padding:10px;min-height:220px}.column h4{margin:0 0 10px;font-size:13px;color:#c5d5ff}.tcard{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px;margin-bottom:8px;transition:transform .2s ease, border-color .2s ease}.tcard:hover{transform:translateY(-2px);border-color:rgba(110,168,254,.55)}.tcard a{color:#dce7ff;text-decoration:none;font-weight:700}.tcard .meta{color:#9cb0dd;font-size:12px;margin-top:6px}
 .category-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.cat{border:1px solid var(--border);background:rgba(255,255,255,.03);padding:12px;border-radius:14px;cursor:pointer;transition:.2s}.cat:hover{transform:translateY(-1px)}.cat.active{border-color:rgba(110,168,254,.7);box-shadow:0 0 0 3px rgba(110,168,254,.15)}.cat .emoji{font-size:18px}
