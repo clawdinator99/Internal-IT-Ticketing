@@ -1,1 +1,39 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin Login</title><link rel="stylesheet" href="/public/styles.css"></head><body><div class="container" style="max-width:560px"><%- include('partials_top') %><div class="card"><h1>Admin Access</h1><p class="small">Sign in with your admin credentials.</p><% if (error) { %><div class="error"><%= error %></div><% } %><form method="post" action="/admin/login" class="grid"><div class="full"><label>Username</label><input name="username" required></div><div class="full"><label>Password</label><input type="password" name="password" required></div><div class="full"><button type="submit">Enter Dashboard</button></div></form></div></div></body></html>
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Login</title>
+  <link rel="stylesheet" href="/public/styles.css">
+</head>
+<body>
+  <div class="container" style="max-width:620px">
+    <%- include('partials_top') %>
+
+    <div class="card auth-card fade-up">
+      <h1>Admin Access</h1>
+      <p class="small">Sign in with your admin credentials.</p>
+
+      <% if (error) { %>
+        <div class="error"><%= error %></div>
+      <% } %>
+
+      <form method="post" action="/admin/login" class="grid">
+        <div class="full">
+          <label>Username</label>
+          <input name="username" required autocomplete="username">
+        </div>
+
+        <div class="full">
+          <label>Password</label>
+          <input type="password" name="password" required autocomplete="current-password">
+        </div>
+
+        <div class="full form-actions">
+          <button type="submit" class="auth-submit">Enter Dashboard</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

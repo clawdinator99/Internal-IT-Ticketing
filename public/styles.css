@@ -18,6 +18,7 @@ input::placeholder,textarea::placeholder{color:#8ea0cb}input:focus,select:focus,
 select option{background:#ffffff;color:#111827}
 button,.btn{border:0;border-radius:14px;padding:11px 16px;cursor:pointer;color:#fff;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#5e95ff,#7f7bff)}
 .form-actions{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.auth-card{padding:24px}.auth-card h1{margin-bottom:8px}.auth-submit{width:100%;min-height:44px}
 .btn.secondary{background:rgba(255,255,255,.06);border:1px solid var(--border);color:#e5ebff}
 .error{background:rgba(239,68,68,.2);color:#ffd4d4;border:1px solid rgba(239,68,68,.45);padding:10px 12px;border-radius:12px;margin-bottom:12px}
 .table{width:100%;border-collapse:collapse}.table th,.table td{text-align:left;padding:10px;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
