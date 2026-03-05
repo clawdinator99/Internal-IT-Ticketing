@@ -262,7 +262,25 @@ async function addAudit(ticket, actor, action, fromValue = null, toValue = null,
     [ticket, actor, action, fromValue, toValue, note, toDbTs()]);
 }
 
-function fmt(ts) { return ts ? dayjs(ts).format('DD MMM YYYY, h:mm A') : '-'; }
+function fmt(ts) {
+  if (!ts) return '-';
+  let d;
+  if (typeof ts === 'string' && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(ts)) {
+    d = new Date(ts.replace(' ', 'T') + 'Z'); // MySQL DATETIME stored as UTC
+  } else {
+    d = new Date(ts);
+  }
+  if (Number.isNaN(d.getTime())) return String(ts);
+  return new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  }).format(d) + ' IST';
+}
 
 app.get('/', (_, res) => res.redirect('/submit'));
 app.get('/submit', (_, res) => res.render('submit', { error: null, values: {} }));

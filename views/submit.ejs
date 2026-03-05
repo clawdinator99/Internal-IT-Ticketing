@@ -4,7 +4,7 @@
   <p class="small">No account. No friction. Under 60 seconds.</p>
   <% if (error) { %><div class="error"><%= error %></div><% } %>
 
-  <form method="post" action="/submit" enctype="multipart/form-data" class="grid">
+  <form method="post" action="/submit" class="grid">
     <div><label>Name *</label><input name="submitter_name" required value="<%= values.submitter_name || '' %>"></div>
     <div><label>Employee ID *</label><input name="employee_id" required value="<%= values.employee_id || '' %>"></div>
     <div><label>Email *</label><input type="email" name="email" required value="<%= values.email || '' %>"></div>
@@ -12,7 +12,6 @@
     <div><label>Urgency *</label><select name="priority" required><option>Low</option><option>Medium</option><option>High</option></select></div>
     <div class="full"><label>Short summary *</label><input name="summary" required maxlength="120" placeholder="One-line summary"></div>
     <div class="full"><label>Description *</label><textarea name="description" rows="4" required placeholder="What happened? What did you already try?"><%= values.description || '' %></textarea></div>
-    <div class="full"><label>Attachments (max 3, each 10MB)</label><input type="file" name="attachments" multiple></div>
-    <div class="full"><button type="submit">Create Ticket</button> <a class="btn secondary" href="/status">Track Existing Ticket</a></div>
+    <div class="full"><button type="submit">Create Ticket</button></div>
   </form>
 </div></div><script src="/public/app.js"></script></body></html>
