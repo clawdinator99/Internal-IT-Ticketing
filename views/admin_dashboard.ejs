@@ -44,14 +44,15 @@
           <label>Priority</label>
           <select name="priority">
             <option value="" <%= !filters.priority ? 'selected' : '' %>>All</option>
-            <option <%= filters.priority==='Low'?'selected':'' %>>Low</option>
-            <option <%= filters.priority==='Medium'?'selected':'' %>>Medium</option>
-            <option <%= filters.priority==='High'?'selected':'' %>>High</option>
+            <option value="Low" <%= filters.priority==='Low'?'selected':'' %>>Low</option>
+            <option value="Medium" <%= filters.priority==='Medium'?'selected':'' %>>Medium</option>
+            <option value="High" <%= filters.priority==='High'?'selected':'' %>>High</option>
           </select>
 
-          <br>
-          <button type="submit">Apply</button>
-          <a class="btn secondary" href="/admin" style="margin-left:8px">Reset</a>
+          <div class="form-actions">
+            <button type="submit">Apply</button>
+            <a class="btn secondary" href="/admin">Reset</a>
+          </div>
         </form>
 
         <hr>
