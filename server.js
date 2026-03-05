@@ -337,7 +337,7 @@ app.post('/admin/login', (req, res) => {
   const { username, password } = req.body;
   if (username !== ADMIN_USER || password !== ADMIN_PASS) return res.status(401).render('admin_login', { error: 'Invalid credentials' });
   const token = crypto.createHmac('sha256', SESSION_SECRET).update(`${ADMIN_USER}:session`).digest('hex');
-  res.cookie('admin_session', token, { httpOnly: true, sameSite: 'lax', secure: IS_PROD, maxAge: 12 * 60 * 60 * 1000 });
+  res.cookie('admin_session', token, { httpOnly: true, sameSite: 'lax', secure: false, maxAge: 12 * 60 * 60 * 1000 });
   res.redirect('/admin');
 });
 
